@@ -17,7 +17,7 @@ class EmployeeService {
             foreach ($employees as $employee) {
                 $joiningDate = Carbon::parse($employee->joining_date);
                 $date = $joiningDate->diff(Carbon::now());
-                $employee->is_active = ($date->y >= 5 && $employee->status == 1);
+                $employee->is_active = ($date->y > 5 && $employee->status == 1);
                 $employee->joining_date = $joiningDate->format('M d, Y');
                 $data[] = $employee;
             }
