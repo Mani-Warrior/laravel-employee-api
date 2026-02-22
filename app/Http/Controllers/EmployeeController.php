@@ -81,10 +81,10 @@ class EmployeeController extends Controller
         }
     }
 
-    public function searchEmployee($name){
+    public function searchEmployee($query){
         try{
-            $employees = $this->employeeService->search($name);
-            if ($employees->isEmpty()) {
+            $employees = $this->employeeService->search($query);
+            if (empty($employees['data'])) {
                 return response()->json([
                     'status' => false,
                     'message' => 'No employees found'

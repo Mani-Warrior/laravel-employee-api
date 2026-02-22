@@ -13,17 +13,20 @@ class EmployeeService {
     public function fetchEmployees(){
         try{
             $employees = DB::table($this->table)->orderBy('created_at', 'desc')->paginate($this->perPage);
-            foreach ($employees as $employee){
+            $data = [];
+            foreach ($employees as $employee) {
                 $joiningDate = Carbon::parse($employee->joining_date);
                 $date = $joiningDate->diff(Carbon::now());
-                if($date->y >= 5 && $employee->status == 1){
-                    $employee->is_active = true;
-                }else{
-                    $employee->is_active = false;
-                }
-                $employee->joining_date = Carbon::parse($employee->joining_date)->format('M d, Y');
+                $employee->is_active = ($date->y >= 5 && $employee->status == 1);
+                $employee->joining_date = $joiningDate->format('M d, Y');
+                $data[] = $employee;
             }
-            return $employees;
+            return [
+                'data' => $data,
+                'current_page' => $employees->currentPage(),
+                'last_page' => $employees->lastPage(),
+                'total' => $employees->total(),
+            ];
         }catch(Exception $e) {
             \Log::error('DB Fetch Error: '.$e->getMessage());
             throw $e;
@@ -72,25 +75,28 @@ class EmployeeService {
         }
     }
 
-    public function search($name){
+    public function search($query){
         try{
             $employees = DB::table($this->table)
-            ->where('name', 'LIKE', "%$name%")
-            ->orWhere('email', 'LIKE', "%$name%")
-            ->orWhere('phone_no', 'LIKE', "%$name%")
-            ->orWhere('designation', 'LIKE', "%$name%")
-            ->get();
-            foreach ($employees as $employee){
+            ->where('name', 'LIKE', "%$query%")
+            ->orWhere('email', 'LIKE', "%$query%")
+            ->orWhere('phone_no', 'LIKE', "%$query%")
+            ->orWhere('designation', 'LIKE', "%$query%")
+            ->paginate($this->perPage);
+            $data = [];
+            foreach ($employees as $employee) {
                 $joiningDate = Carbon::parse($employee->joining_date);
                 $date = $joiningDate->diff(Carbon::now());
-                if($date->y >= 5 && $employee->status == 1){
-                    $employee->is_active = true;
-                }else{
-                    $employee->is_active = false;
-                }
-                $employee->joining_date = Carbon::parse($employee->joining_date)->format('M d, Y');
+                $employee->is_active = ($date->y >= 5 && $employee->status == 1);
+                $employee->joining_date = $joiningDate->format('M d, Y');
+                $data[] = $employee;
             }
-            return $employees;
+            return [
+                'data' => $data,
+                'current_page' => $employees->currentPage(),
+                'last_page' => $employees->lastPage(),
+                'total' => $employees->total(),
+            ];
         }catch(Exception $e){
             \Log::error('DB Fetch Error: '.$e->getMessage());
             throw $e;
